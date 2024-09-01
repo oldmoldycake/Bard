@@ -1,31 +1,69 @@
+import discord
+from discord import app_commands
+from discord import Embed
+from discord import Color as c
+from discord.ext import commands
+from discord.ui import Button, View, Modal, TextInput, Select
 import asyncio
 import random 
 import re
+import numpy as np
+from dotenv import load_dotenv
+import os
+
+from cogs.modules.QueryHandler import QueryHandler
 
 
 
 class roll_functions:
     def __init__(self) -> None:
-        pass
-    async def roll(self, roll= None, advantage_disadvantage = None, roll_option = None, roll_option_value = None, additional_roll_1 = None, additional_roll_2 = None, modifier = None, modifier_2 = None):
-        roll = roll.upper()
+        db_host = os.getenv("db_host")
+        db_username = os.getenv("db_username")
+        db_password = os.getenv("db_password")
 
+        self.db_name = os.getenv("db_name")
+        self.db_data_table_name = os.getenv("db_data_table_name")
+        self.data_table_name = os.genenv("")
+        self.DATABASE_CONFIG = {
+            'host': 'localhost',
+            'user': 'oldmoldycake',
+            'password': '1229Bogging123123!',
+        }
+
+    async def get_var_name(self, var):
+        for name, value in locals().items():
+            if value is var:
+                return name
+        return None  # Variable not found in local scope
+    
+    async def is_not_round(self, number):
+          return number % 1 != 0
+    
+    async def roll(self, interaction: discord.Interaction, roll= None, advantage_disadvantage = None, roll_option = None, roll_option_value = None, additional_roll_1 = None, additional_roll_2 = None, modifier = None, modifier_2 = None):
+        roll = roll.upper()
+        dnd_mods = ('strength', 'dexterity', 'constitution', 'intelligence', 
+            'wisdom', 'charisma', 'acrobatics', 'animal handling', 'arcana', 
+            'athletics', 'deception', 'history', 'insight', 'intimidation', 
+            'investigation', 'medicine', 'perception', 'performance', 'persuasion', 
+            'religion', 'slight of hand', 'stealth', 'survival')
+        
         if "D" not in roll or roll.endswith("D"):
-            #await interaction.response.send_message(f"Invalid Roll Format {roll}. Please format like \"2D20\" or \"1D6\".")
             return ["error",f"Invalid Roll Format {roll}. Please format like \"2D20\" or \"1D6\"."]
         
         if roll.startswith("D"):
             roll = "1" + roll
         
-        rolls, sides = roll.split('D')
+        split_roll = roll.split('D')
 
+        if len(split_roll) > 2:
+            return ["error", "Please only include one D"]
+        else:
+            rolls, sides =  split_roll
         if (additional_roll_1 is not None):
             additional_roll_1 = additional_roll_1.upper()
             if ("D" not in  additional_roll_1):
-                #await interaction.response.send_message(f"Invalid Roll Format {additional_roll_1}. Please format like \"2D20\" or \"1D6\".")
                 return ["error", f"Invalid Roll Format {additional_roll_1}. Please format like \"2D20\" or \"1D6\"."]
 
-        if (additional_roll_1 is not None):
             if additional_roll_1.startswith("D"):
                 additional_roll_1 = "1" + additional_roll_1 
             additional_roll_1_rolls, additional_roll_1_sides = additional_roll_1.split('D')
@@ -38,30 +76,29 @@ class roll_functions:
                 additional_roll_1_results.append(additional_roll_1_result)
                 additional_roll_1_sum = additional_roll_1_sum + additional_roll_1_result
 
-
-
         if (additional_roll_2 is not None):
-            additional_roll_2 =additional_roll_2.upper()
-            if "D" not in  additional_roll_2:
-                #await interaction.response.send_message(f"Invalid Roll Format {additional_roll_2}. Please format like \"2D20\" or \"1D6\".")
-                return ["error",f"Invalid Roll Format {additional_roll_2}. Please format like \"2D20\" or \"1D6\"."]
-        
-        
-        if (additional_roll_2 is not None):
+            additional_roll_2 = additional_roll_2.upper()
+            if ("D" not in  additional_roll_2):
+                return ["error", f"Invalid Roll Format {additional_roll_2}. Please format like \"2D20\" or \"1D6\"."]
+
             if additional_roll_2.startswith("D"):
-                additional_roll_2 = "1" + additional_roll_2 
-            additional_roll_2_rolls, additional_roll_2_sides = additional_roll_2.split('D') 
-            
+                additional_roll_2 = "1" + additional_roll_2
+            additional_roll_2_rolls, additional_roll_2_sides = additional_roll_2.split('D')
             additional_roll_2_results = []
 
             additional_roll_2_sum = 0 
-
             for i in range(int(additional_roll_2_rolls)):
                 additional_roll_2_result = random.randint(1,int(additional_roll_2_sides))
                 additional_roll_2_results.append(additional_roll_2_result)
                 additional_roll_2_sum = additional_roll_2_sum + additional_roll_2_result
         
         if modifier is not None:
+            if modifier.lower() in dnd_mods:
+                modifier = self.QH.SQL(self.db_name, f"SELECT {modifier} FROM {self.data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
+            elif not modifier.isdigit():
+                return ["error", f"Please enter a valid modifier value"]
+            
+
             parts = []
             if (modifier.startswith("+")) or modifier.startswith("-") or modifier.startswith("*") or modifier.startswith("/"):
                 parts = re.split(r"(?<=[\+\-\*\/])|(?=[\+\-\*\/])", modifier)
@@ -76,15 +113,18 @@ class roll_functions:
                     sign_count+= 1
 
             if sign_count > 1:
-                #await interaction.response.send_message("Please only include one sign in modifier")
                 return None
             elif len(parts) > 2:
-                #await interaction.response.send_message("Please keep modifiy two parameter in \"+2\" formart.")
                 return None
             
             modifier_sign, modifier_value = parts
 
         if modifier_2 is not None:
+            if modifier_2.lower() in dnd_mods:
+                modifier_2 = self.QH.SQL(self.db_name, f"SELECT {modifier_2} FROM {self.data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
+            elif not modifier_2.isdigit():
+                return ["error", f"Please enter a valid modifier_2 value"]
+
             parts = []
             if (modifier_2.startswith("+")) or modifier_2.startswith("-") or modifier_2.startswith("*") or modifier_2.startswith("/"):
                     parts = re.split(r"(?<=[\+\-\*\/])|(?=[\+\-\*\/])", modifier)
@@ -97,41 +137,32 @@ class roll_functions:
             if part in ("+","-","/","*"):
                     sign_count+= 1
             if sign_count > 1:
-                #await interaction.response.send_message("Please only include one sign in modifier_2")
                 return None
             elif len(parts) > 2:
-                #await interaction.response.send_message("Please keep modifiy two parameter in \"+2\" formart.")
                 return None
             modifier_2_sign, modifier_2_value = parts
 
-
         if roll_option not in ('exploding','keep_highest','drop_highest','keep_lowest','drop_lowest', None):
-            #await interaction.response.send_message("Invalid roll option. Please select a valid option")
-            return ["errror","Invalid roll option. Please select a valid option"]
+            return ["error","Invalid roll option. Please select a valid option"]
+        elif not rolls.isdigit():
+            return ["error", "Please make sure total rolls in a number"] 
         elif int(rolls) > 50:
-            #await interaction.response.send_message("Please enter a roll value below fifty.")
-            return ["errror","Please enter a roll value below fifty."]
+            return ["error","Please enter a roll value below fifty."]
         elif (roll_option_value is not None) and (roll_option_value < 0):
-            #await interaction.response.send_message("Please enter a roll option value above one")
-            return ["errror","Please enter a roll option value above one"]
-        elif (roll_option_value is not None and self.is_not_round(roll_option_value)) or (modifier is not None and self.is_not_round(int(modifier_value))) or (modifier_2 is not None and self.is_not_round(int(modifier_2_value))):
-            #await interaction.response.send_message("Please use whole numbers")
-            return ["errror","Please use whole numbers"]
+            return ["error","Please enter a roll option value above one"]
+        elif (roll_option_value is not None and await self.is_not_round(roll_option_value)) or (modifier is not None and  await self.is_not_round(int(modifier_value))) or (modifier_2 is not None and await self.is_not_round(int(modifier_2_value))):
+            return ["error","Please use whole numbers"]
         elif (roll_option is not None and roll_option_value is None) and (roll_option not in ('exploding')):
-            #await interaction.response.send_message("Missing roll option value. Please put a value and try again")
-            return ["errror","Missing roll option value. Please put a value and try again"]
+            return ["error","Missing roll option value. Please put a value and try again"]
         elif (roll_option_value is not None and roll_option is None) and (roll_option not in ('exploding')):
-            #await interaction.response.send_message("Missing roll option. Please select a roll option and try again")
-            return ["errror",]
+            return ["error","Missing roll option. Please select a roll option and try again"]
         elif (roll_option in ('keep_highest','drop_highest','keep_lowest','drop_lowest')) and (roll_option_value > int(sides)):
-            #await  interaction.response.send_message("This option value can not be higher than number of dice rolls.")
-            return ["errror","This option value can not be higher than number of dice rolls."]
+            return ["error","This option value can not be higher than number of dice rolls."]
         elif (additional_roll_1 is not None) and int(additional_roll_1_rolls) > 50:
-            #await interaction.response.send_message("Please enter a additional_roll_1 value below fifty.")
-            return ["errror","Please enter a additional_roll_1 value below fifty."]
+            return ["error","Please enter a additional_roll_1 value below fifty."]
         elif (additional_roll_2 is not None) and int(additional_roll_2_rolls) > 50:
-            #await interaction.response.send_message("Please enter a additional_roll_2 value below fifty.")
-            return ["errror","Please enter a additional_roll_2 value below fifty."]
+            return ["error","Please enter a additional_roll_2 value below fifty."]
+
         
         if advantage_disadvantage is not None and (advantage_disadvantage == 'disadvantage' or advantage_disadvantage == 'advantage'):
             roll_results = []
@@ -174,10 +205,10 @@ class roll_functions:
 
             if additional_roll_2 is not None:
                 sum = sum + additional_roll_2_sum
-                
+
                 additional_roll_2_string = ""
                 for additional_roll_2_result in additional_roll_2_results:
-                    additional_roll_2_string = f" + **{additional_roll_2_result}**"
+                    additional_roll_2_string = additional_roll_2_string + f" + **{additional_roll_2_result}**"
                 roll_string = roll_string + additional_roll_2_string
             
             if modifier is not None:
@@ -212,7 +243,8 @@ class roll_functions:
             for i in range(int(rolls)):
                 die_roll = random.randint(1,int(sides))
                 roll_results.append(int(die_roll))
-                roll_string += f"{die_roll}, "
+                roll_string += f"{die_roll} + "
+            roll_string = roll_string.rstrip(' + ')
 
 
             # Apply roll options
@@ -249,7 +281,7 @@ class roll_functions:
                 
                 additional_roll_2_string = ""
                 for additional_roll_2_result in additional_roll_2_results:
-                    additional_roll_2_string = f" + {additional_roll_2_result}"
+                    additional_roll_2_string = additional_roll_2_string + f" + {additional_roll_2_result}"
                 roll_string = roll_string + additional_roll_2_string
             
             if modifier is not None:
@@ -273,4 +305,9 @@ class roll_functions:
                 elif modifier_2_sign == "*":
                     sum = sum * modifier_2_value
                 roll_string = roll_string +  " " + modifier_2_sign + " " + modifier_2_value
+
+            for chosen_roll in roll_results:
+                sum = sum + int(chosen_roll)
+
             return ["success", roll_string, sum]                        
+needed
