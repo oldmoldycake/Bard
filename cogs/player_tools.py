@@ -27,7 +27,6 @@ class player_tools(commands.Cog):
 
         self.db_name = os.getenv("db_name")
         self.db_data_table_name = os.getenv("db_data_table_name")
-        self.data_table_name = os.genenv("")
         self.DATABASE_CONFIG = {
             'host': 'localhost',
             'user': 'oldmoldycake',
@@ -128,7 +127,7 @@ class player_tools(commands.Cog):
         else:
             user_id, current_modifier_value = user_info[0][0]
 
-            self.QH.SQL(self.db_name, f"UPDATE {self.data_table_name} SET {modifier} = {value} WHERE user_id = user_id")
+            self.QH.SQL(self.db_name, f"UPDATE {self.db_data_table_name} SET {modifier} = {value} WHERE user_id = user_id")
 
             modifier_embed = Embed(title="Set modifier" , description=f"Modifier {modifier} set successfully")
             

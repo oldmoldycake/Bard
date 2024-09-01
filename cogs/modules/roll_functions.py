@@ -23,7 +23,6 @@ class roll_functions:
 
         self.db_name = os.getenv("db_name")
         self.db_data_table_name = os.getenv("db_data_table_name")
-        self.data_table_name = os.genenv("")
         self.DATABASE_CONFIG = {
             'host': 'localhost',
             'user': 'oldmoldycake',
@@ -94,7 +93,7 @@ class roll_functions:
         
         if modifier is not None:
             if modifier.lower() in dnd_mods:
-                modifier = self.QH.SQL(self.db_name, f"SELECT {modifier} FROM {self.data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
+                modifier = self.QH.SQL(self.db_name, f"SELECT {modifier} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
             elif not modifier.isdigit():
                 return ["error", f"Please enter a valid modifier value"]
             
@@ -121,7 +120,7 @@ class roll_functions:
 
         if modifier_2 is not None:
             if modifier_2.lower() in dnd_mods:
-                modifier_2 = self.QH.SQL(self.db_name, f"SELECT {modifier_2} FROM {self.data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
+                modifier_2 = self.QH.SQL(self.db_name, f"SELECT {modifier_2} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
             elif not modifier_2.isdigit():
                 return ["error", f"Please enter a valid modifier_2 value"]
 
@@ -310,4 +309,4 @@ class roll_functions:
                 sum = sum + int(chosen_roll)
 
             return ["success", roll_string, sum]                        
-needed
+
