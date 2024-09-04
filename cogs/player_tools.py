@@ -20,6 +20,7 @@ class player_tools(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+        load_dotenv('/home/oldmoldycake/keys/keys.env') 
 
         db_host = os.getenv("db_host")
         db_username = os.getenv("db_username")
@@ -80,7 +81,7 @@ class player_tools(commands.Cog):
 
             dnd_beyond_link = f"https://www.dndbeyond.com/{category}"
             
-            lookup_emebd.add_field(name="DnD Beyond", value="[Link]({dnd_beyond_link})")
+            lookup_emebd.add_field(name="DnD Beyond", value=f"[Link]({dnd_beyond_link})")
 
             if category in ('races', 'classes', 'spells', 'magic-items', 'monsters'):
                 if category == 'races':
@@ -94,7 +95,7 @@ class player_tools(commands.Cog):
                 elif category == 'monsters':
                     forgotten_realms_wiki_link = "https://forgottenrealms.fandom.com/wiki/Category:Creatures"
 
-                lookup_emebd.add_field(name="Forgotten Realms Wiki", value=f"[Link]({forgotten_realms_wiki_link}")
+                lookup_emebd.add_field(name="Forgotten Realms Wiki", value=f"[Link]({forgotten_realms_wiki_link})")
             else:
                 pass
 

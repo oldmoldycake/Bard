@@ -41,7 +41,7 @@ class dm_tools(commands.Cog):
             if user is None or user.id == interaction.user.id:
                 skill_check_emebed.description = f"{type} roll with {difficulty_class} difficulty class"
 
-                results = await self.rf.roll(roll="2D20", advantage_disadvantage=advantage_disadvantage, roll_option=None, roll_option_value=None, additional_roll_1=additional_roll_1, additional_roll_2= additional_roll_2, modifier=modifier, modifier_2=modifier_2)
+                results = await self.rf.roll(interaction=interaction, roll="2D20", advantage_disadvantage=advantage_disadvantage, roll_option=None, roll_option_value=None, additional_roll_1=additional_roll_1, additional_roll_2= additional_roll_2, modifier=modifier, modifier_2=modifier_2)
                 if results[0] == "error":
                     skill_check_emebed.description = f"Error with roll function.\nIf you see this please open a issue on [Github](https://github.com/oldmoldycake/Bard).\nPlease copy the exact command you sent to trigger this so that I can look into an fix it."
                     await interaction.response.send_message

@@ -17,6 +17,8 @@ from cogs.modules.QueryHandler import QueryHandler
 
 class roll_functions:
     def __init__(self) -> None:
+        load_dotenv('/home/oldmoldycake/keys/keys.env') 
+
         db_host = os.getenv("db_host")
         db_username = os.getenv("db_username")
         db_password = os.getenv("db_password")
@@ -24,10 +26,12 @@ class roll_functions:
         self.db_name = os.getenv("db_name")
         self.db_data_table_name = os.getenv("db_data_table_name")
         self.DATABASE_CONFIG = {
-            'host': 'localhost',
-            'user': 'oldmoldycake',
-            'password': '1229Bogging123123!',
+            'host': db_host,
+            'user': db_username,
+            'password': db_password,
         }
+
+        self.QH = QueryHandler(self.DATABASE_CONFIG)
 
     async def get_var_name(self, var):
         for name, value in locals().items():
@@ -93,7 +97,13 @@ class roll_functions:
         
         if modifier is not None:
             if modifier.lower() in dnd_mods:
-                modifier = self.QH.SQL(self.db_name, f"SELECT {modifier} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
+                results = self.QH.SQL(self.db_name, f"SELECT {modifier} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")
+
+                if len(results) == 0:
+                    return ["error",f"Please set your modifiers first"]
+
+                print(result)
+                modifier = results[0][0]
             elif not modifier.isdigit():
                 return ["error", f"Please enter a valid modifier value"]
             
@@ -120,7 +130,13 @@ class roll_functions:
 
         if modifier_2 is not None:
             if modifier_2.lower() in dnd_mods:
-                modifier_2 = self.QH.SQL(self.db_name, f"SELECT {modifier_2} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")[0][0]
+                results = self.QH.SQL(self.db_name, f"SELECT {modifier_2} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")
+
+                if modifier is None:
+                    return ["error",f"Please set your modifiers first"]
+                
+                modifier = results[0][0]
+
             elif not modifier_2.isdigit():
                 return ["error", f"Please enter a valid modifier_2 value"]
 

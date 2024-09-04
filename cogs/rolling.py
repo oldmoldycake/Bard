@@ -32,7 +32,7 @@ class rolling(commands.Cog):
         hidden = "Hide the roll from other players. Off by deafult"
         )
     async def roll(self, interaction: discord.Interaction, roll:str,advantage_disadvantage: str = None, roll_option:str = None, roll_option_value:int = None, additional_roll_1:str = None, additional_roll_2:str = None, modifier:str = None, modifier_2:str = None, hidden: bool =  False):
-        roll_result = await self.rf.roll(roll= roll, advantage_disadvantage = advantage_disadvantage, roll_option = roll_option, roll_option_value = roll_option_value, additional_roll_1 = additional_roll_1, additional_roll_2 = additional_roll_2, modifier = modifier, modifier_2 = modifier_2)
+        roll_result = await self.rf.roll(roll= roll, interaction = interaction, advantage_disadvantage = advantage_disadvantage, roll_option = roll_option, roll_option_value = roll_option_value, additional_roll_1 = additional_roll_1, additional_roll_2 = additional_roll_2, modifier = modifier, modifier_2 = modifier_2)
         print(roll_result)
         if roll_result[0] == "error":
             status, error_message = roll_result
