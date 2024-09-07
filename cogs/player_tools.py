@@ -122,17 +122,19 @@ class player_tools(commands.Cog):
     
     async def set_mods(self, interaction: discord.Interaction, modifier: str, value: int):
         user_info = self.QH.SQL(self.db_name, f"SELECT {interaction.user.id}, {modifier} FROM user_data WHERE user_id = {interaction.user.id}")
-        
-        if user_info is None:
+
+        if len(user_info) == 0:
             self.QH.SQL(self.db_name, f"INSERT INTO user_data (user_id, {modifier}) VALUES ({interaction.user.id},{value})")
+            print(f"INSERT INTO user_data (user_id, {modifier}) VALUES ({interaction.user.id},{value})")
+
         else:
-            user_id, current_modifier_value = user_info[0][0]
+            print(user_info)
+            user_id, current_modifier_value = user_info[0]
 
             self.QH.SQL(self.db_name, f"UPDATE {self.db_data_table_name} SET {modifier} = {value} WHERE user_id = user_id")
 
-            modifier_embed = Embed(title="Set modifier" , description=f"Modifier {modifier} set successfully")
-            
-            await interaction.response.send_message(embed=modifier_embed)
+        modifier_embed = Embed(title="Set modifier" , description=f"Modifier {modifier} set successfully")            
+        await interaction.response.send_message(embed=modifier_embed)
 
     @set_mods.autocomplete("modifier")
     async def autocomplete_callback(self, interaction: discord.Interaction, current: str):
@@ -146,7 +148,7 @@ class player_tools(commands.Cog):
 
         # Filter based on what the user is typing
         matching_choices = [
-            app_commands.Choice(name=col, value=col) 
+            app_commands.Choice(name=col, value=col.lower()) 
             for col in column_names if current.lower() in col.lower()
         ]
 

@@ -9,7 +9,7 @@ import os
 
 #super().__init__(command_prefix=commands.when_mentioned_or('.'), intents=discord.Intents().all())
 bot = commands.Bot(command_prefix="/", intents=discord.Intents.all())
-cogslist = ['cogs.rolling', 'cogs.dm_tools', 'cogs.player_tools']
+cogslist = ['cogs.rolling', 'cogs.dm_tools', 'cogs.player_tools', 'cogs.utilites']
 
 
 @bot.event

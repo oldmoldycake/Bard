@@ -28,11 +28,11 @@ class rolling(commands.Cog):
         additional_roll_1 = "Lets you add another dice roll to the initial roll", 
         additional_roll_2 = "Lets you add another dice roll to the initial roll", 
         modifier = "Add/Subtract/Divide/Multiply a modifiery to your roll. Adds be default",
-        modifier_2 = "Add/Subtract/Divide/Multiply a modifiery to your roll. Adds by default",
+        saved_modifier = "Select one modifier vaules set with /set_mods",
         hidden = "Hide the roll from other players. Off by deafult"
         )
-    async def roll(self, interaction: discord.Interaction, roll:str,advantage_disadvantage: str = None, roll_option:str = None, roll_option_value:int = None, additional_roll_1:str = None, additional_roll_2:str = None, modifier:str = None, modifier_2:str = None, hidden: bool =  False):
-        roll_result = await self.rf.roll(roll= roll, interaction = interaction, advantage_disadvantage = advantage_disadvantage, roll_option = roll_option, roll_option_value = roll_option_value, additional_roll_1 = additional_roll_1, additional_roll_2 = additional_roll_2, modifier = modifier, modifier_2 = modifier_2)
+    async def roll(self, interaction: discord.Interaction, roll:str,advantage_disadvantage: str = None, roll_option:str = None, roll_option_value:int = None, additional_roll_1:str = None, additional_roll_2:str = None, modifier:str = None, saved_modifier:str = None, hidden: bool =  False):
+        roll_result = await self.rf.roll(roll= roll, interaction = interaction, advantage_disadvantage = advantage_disadvantage, roll_option = roll_option, roll_option_value = roll_option_value, additional_roll_1 = additional_roll_1, additional_roll_2 = additional_roll_2, modifier = modifier, modifier_2 = saved_modifier)
         print(roll_result)
         if roll_result[0] == "error":
             status, error_message = roll_result
@@ -51,7 +51,7 @@ class rolling(commands.Cog):
         elif roll_result[0] == "success":
             status, roll_string, sum = roll_result
 
-            roll_success_embed = Embed(title=f"Roll results for {roll} :die:")
+            roll_success_embed = Embed(title=f"Roll results for {roll}  🎲")
 
             roll_success_embed.add_field(
                 name="Roll",
@@ -93,6 +93,23 @@ class rolling(commands.Cog):
         return None  # Return None if no match is found 
 
 
+    @roll.autocomplete("saved_modifier")
+    async def autocomplete_callback(self, interaction: discord.Interaction, current: str):
+        column_names = [
+            'Strength', 'Dexterity', 'Constitution', 'Intelligence', 
+            'Wisdom', 'Charisma', 'Acrobatics', 'Animal Handling', 'Arcana', 
+            'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 
+            'Investigation', 'Medicine', 'Perception', 'Performance', 'Persuasion', 
+            'Religion', 'Slight of Hand', 'Stealth', 'Survival'
+        ]
+
+        # Filter based on what the user is typing
+        matching_choices = [
+            app_commands.Choice(name=col, value=col.lower()) 
+            for col in column_names if current.lower() in col.lower()
+        ]
+
+        return matching_choices
     
 async def setup(client:commands.Bot) -> None:
     await client.add_cog(rolling(client))

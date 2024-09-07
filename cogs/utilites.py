@@ -10,6 +10,7 @@ import re
 import numpy as np
 from dotenv import load_dotenv
 import os
+import requests 
 
 from cogs.modules.QueryHandler import QueryHandler
 
@@ -36,18 +37,15 @@ class utilities(commands.Cog):
     @app_commands.command(name="info", description="Info about the bot")
     async def skill_check(self, interaction: discord.Integration):
         info_embed = Embed(title="Bard Info")
-
-        info_embed.description = """
-
-
-            """
+        info_embed.description = """"""
 
 
-
+"""
     @app_commands.command(name="cat_pic", descrption="cat images via TheCatAPI.")
     async def cat_pic(self, interaction: discord.Interaction):
+        response = requests.get('https://api.example.com/data') 
         pass
-    
+   """ 
 async def setup(client:commands.Bot) -> None:
     await client.add_cog(utilities(client))
 

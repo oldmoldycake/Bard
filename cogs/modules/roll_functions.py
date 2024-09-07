@@ -62,6 +62,9 @@ class roll_functions:
             return ["error", "Please only include one D"]
         else:
             rolls, sides =  split_roll
+            if not sides.isdigit():
+                return ["error","please enter enter sides as a number"]
+            
         if (additional_roll_1 is not None):
             additional_roll_1 = additional_roll_1.upper()
             if ("D" not in  additional_roll_1):
@@ -96,15 +99,7 @@ class roll_functions:
                 additional_roll_2_sum = additional_roll_2_sum + additional_roll_2_result
         
         if modifier is not None:
-            if modifier.lower() in dnd_mods:
-                results = self.QH.SQL(self.db_name, f"SELECT {modifier} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")
-
-                if len(results) == 0:
-                    return ["error",f"Please set your modifiers first"]
-
-                print(result)
-                modifier = results[0][0]
-            elif not modifier.isdigit():
+            if not modifier.isdigit():
                 return ["error", f"Please enter a valid modifier value"]
             
 
@@ -131,30 +126,31 @@ class roll_functions:
         if modifier_2 is not None:
             if modifier_2.lower() in dnd_mods:
                 results = self.QH.SQL(self.db_name, f"SELECT {modifier_2} FROM {self.db_data_table_name} WHERE user_id = {interaction.user.id}")
-
-                if modifier is None:
-                    return ["error",f"Please set your modifiers first"]
                 
-                modifier = results[0][0]
+                modifier_2 = results[0][0]
 
             elif not modifier_2.isdigit():
                 return ["error", f"Please enter a valid modifier_2 value"]
 
             parts = []
-            if (modifier_2.startswith("+")) or modifier_2.startswith("-") or modifier_2.startswith("*") or modifier_2.startswith("/"):
+            print(str(modifier_2).isdigit())
+            if not str(modifier_2).isdigit() and (str(modifier_2).startswith("+")) or str(modifier_2).startswith("*") or str(modifier_2).startswith("/"):
+                    #took out negative gate. Wil lpost + - not make it so when index 0 of the string is < 0 do not print +
                     parts = re.split(r"(?<=[\+\-\*\/])|(?=[\+\-\*\/])", modifier)
+                    
                     parts = [part.strip() for part in parts if part.strip()] 
             else:
                 parts.append("+")
                 parts.append(modifier_2)
 
             sign_count = 0
-            if part in ("+","-","/","*"):
+            if parts[0] in ("+","-","/","*"):
                     sign_count+= 1
             if sign_count > 1:
                 return None
             elif len(parts) > 2:
                 return None
+            print(parts)
             modifier_2_sign, modifier_2_value = parts
 
         if roll_option not in ('exploding','keep_highest','drop_highest','keep_lowest','drop_lowest', None):
@@ -165,7 +161,7 @@ class roll_functions:
             return ["error","Please enter a roll value below fifty."]
         elif (roll_option_value is not None) and (roll_option_value < 0):
             return ["error","Please enter a roll option value above one"]
-        elif (roll_option_value is not None and await self.is_not_round(roll_option_value)) or (modifier is not None and  await self.is_not_round(int(modifier_value))) or (modifier_2 is not None and await self.is_not_round(int(modifier_2_value))):
+        elif (roll_option_value is not None and await self.is_not_round(roll_option_value)):
             return ["error","Please use whole numbers"]
         elif (roll_option is not None and roll_option_value is None) and (roll_option not in ('exploding')):
             return ["error","Missing roll option value. Please put a value and try again"]
@@ -319,7 +315,7 @@ class roll_functions:
                     sum = round(sum/int(modifier_2_value))
                 elif modifier_2_sign == "*":
                     sum = sum * modifier_2_value
-                roll_string = roll_string +  " " + modifier_2_sign + " " + modifier_2_value
+                roll_string = roll_string +  " " + modifier_2_sign + " " + str(modifier_2_value)
 
             for chosen_roll in roll_results:
                 sum = sum + int(chosen_roll)

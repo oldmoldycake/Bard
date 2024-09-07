@@ -26,10 +26,9 @@ class dm_tools(commands.Cog):
         additional_roll_1 = "Lets you add another dice roll to the initial roll", 
         additional_roll_2 = "Lets you add another dice roll to the initial roll", 
         modifier = "Add/Subtract/Divide/Multiply a modifiery to your roll. Adds be default",
-        modifier_2 = "Add/Subtract/Divide/Multiply a modifiery to your roll. Adds by default",
         hidden = "Hide the roll from other players. Off by deafult"
         )
-    async def skill_check(self, interaction: discord.Integration, type: str, difficulty_class: int, user: discord.User = None, hidden: bool = False, advantage_disadvantage: str = None, additional_roll_1:str =None, additional_roll_2: str =None, modifier: str =None, modifier_2: str =None, group: bool = False): 
+    async def skill_check(self, interaction: discord.Integration, type: str, difficulty_class: int, user: discord.User = None, hidden: bool = False, advantage_disadvantage: str = None, additional_roll_1:str =None, additional_roll_2: str =None, modifier: str =None, group: bool = False): 
         if user is not None:
             skill_check_emebed = Embed(title="Skill Check", description=f"{type} check for {user.name}")
         else:
@@ -41,7 +40,7 @@ class dm_tools(commands.Cog):
             if user is None or user.id == interaction.user.id:
                 skill_check_emebed.description = f"{type} roll with {difficulty_class} difficulty class"
 
-                results = await self.rf.roll(interaction=interaction, roll="2D20", advantage_disadvantage=advantage_disadvantage, roll_option=None, roll_option_value=None, additional_roll_1=additional_roll_1, additional_roll_2= additional_roll_2, modifier=modifier, modifier_2=modifier_2)
+                results = await self.rf.roll(interaction=interaction, roll="2D20", advantage_disadvantage=advantage_disadvantage, roll_option=None, roll_option_value=None, additional_roll_1=additional_roll_1, additional_roll_2= additional_roll_2, modifier=modifier, modifier_2=type)
                 if results[0] == "error":
                     skill_check_emebed.description = f"Error with roll function.\nIf you see this please open a issue on [Github](https://github.com/oldmoldycake/Bard).\nPlease copy the exact command you sent to trigger this so that I can look into an fix it."
                     await interaction.response.send_message
@@ -54,7 +53,7 @@ class dm_tools(commands.Cog):
                 skill_check_emebed.description = f"{type} roll with {difficulty_class} difficulty class\nUser is not {user.mention}. Please have have correct user roll"
 
                 if hidden is False:
-                    await interaction.response.send_message(embed=skill_check_emebed, ephemeral=True)
+                    await interaction.response.send_message(embed=skill_check_emebed, ephemeral=True, allowed_mentions=user.id)
                 else:
                     await interaction.response.send_message(embed=skill_check_emebed)
 
