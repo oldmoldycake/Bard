@@ -99,7 +99,7 @@ class roll_functions:
                 additional_roll_2_sum = additional_roll_2_sum + additional_roll_2_result
         
         if modifier is not None:
-            if not modifier.isdigit():
+            if not str(int(modifier)*-1).isdigit():
                 return ["error", f"Please enter a valid modifier value"]
             
 
@@ -133,7 +133,6 @@ class roll_functions:
                 return ["error", f"Please enter a valid modifier_2 value"]
 
             parts = []
-            print(str(modifier_2).isdigit())
             if not str(modifier_2).isdigit() and (str(modifier_2).startswith("+")) or str(modifier_2).startswith("*") or str(modifier_2).startswith("/"):
                     #took out negative gate. Wil lpost + - not make it so when index 0 of the string is < 0 do not print +
                     parts = re.split(r"(?<=[\+\-\*\/])|(?=[\+\-\*\/])", modifier)
@@ -150,7 +149,6 @@ class roll_functions:
                 return None
             elif len(parts) > 2:
                 return None
-            print(parts)
             modifier_2_sign, modifier_2_value = parts
 
         if roll_option not in ('exploding','keep_highest','drop_highest','keep_lowest','drop_lowest', None):
@@ -219,30 +217,40 @@ class roll_functions:
 
                 additional_roll_2_string = ""
                 for additional_roll_2_result in additional_roll_2_results:
+    
                     additional_roll_2_string = additional_roll_2_string + f" + **{additional_roll_2_result}**"
                 roll_string = roll_string + additional_roll_2_string
             
             if modifier is not None:
+                print("test")
                 if modifier_sign == "+":
                     sum = sum + int(modifier_value)
+                    if int(modifier_value) < 0:                        
+                        roll_string = roll_string + " " + f"**{modifier_value*-1}**"
+                    else:
+                        roll_string = roll_string + f" {modifier_sign} " + f"**{modifier_value}**"
+
                 elif modifier_sign == "-":
                     sum = sum - int(modifier_value)
+                    roll_string = roll_string + f" {modifier_sign} " + f"**{modifier_value}**"
                 elif modifier_sign == "/":
                     sum = round(sum/int(modifier_value))
                 elif modifier_sign == "*":
                     sum = sum * int(modifier_value)
-                roll_string = roll_string +  " " + modifier_sign + " " + f"**{modifier_value}**"
+                roll_string = roll_string +  f"{modifier_sign}" + f"**{modifier_value}**"
 
             if modifier_2 is not None:
+                print(modifier_2_sign)
                 if modifier_2_sign == "+":
+                    print(modifier_2_value)
                     sum = sum + int(modifier_2_value)
-                elif modifier_2_sign == "-":
-                    sum = sum - int(modifier_2_value)
+                    if int(modifier_2_value) < 0:                         
+                        roll_string = roll_string + " " + f"**{modifier_2_value}**"
                 elif modifier_2_sign == "/":
                     sum = round(sum/int(modifier_2_value))
                 elif modifier_2_sign == "*":
                     sum = sum * modifier_2_value
-                roll_string = roll_string +  " " + modifier_2_sign + " " + f"**{modifier_2_value}**"
+                roll_string = roll_string  + " " + {modifier_sign} + " " + f"**{modifier_2_value}**"
 
             return ["success", roll_string, sum]                        
 
@@ -261,24 +269,27 @@ class roll_functions:
             # Apply roll options
             if roll_option == 'keep_highest':
                 roll_results = sorted(roll_results, reverse=True)[:roll_option_value]
-                for roll in roll_results:
-                    sum = sum + int(roll)
+                for roll_result in roll_results:
+                    sum = sum + int(roll_result)
                 roll_string = "+ ".join(str(r) for r in roll_results)
             elif roll_option == 'drop_highest':
                 roll_results = sorted(roll_results)[:int(rolls) - roll_option_value]
-                for roll in roll_results:
-                    sum = sum + int(roll)
+                for roll_result in roll_results:
+                    sum = sum + int(roll_result)
                 roll_string = "+ ".join(str(r) for r in roll_results)
             elif roll_option == 'keep_lowest':
                 roll_results = sorted(roll_results)[:roll_option_value]
-                for roll in roll_results:
-                    sum = sum + int(roll)
+                for roll_result in roll_results:
+                    sum = sum + int(roll_result)
                 roll_string = "+ ".join(str(r) for r in roll_results)
             elif roll_option == 'drop_lowest':
                 roll_results = sorted(roll_results, reverse=True)[:int(rolls) - roll_option_value]
-                for roll in roll_results:
-                    sum = sum + int(roll)
+                for roll_result in roll_results:
+                    sum = sum + int(roll_result)
                 roll_string = "+ ".join(str(r) for r in roll_results)
+            else:
+                for roll_result in roll_results:
+                    sum = sum + int(roll_result)
 
             if additional_roll_1 is not None:
                 sum = sum + additional_roll_1_sum
@@ -296,29 +307,38 @@ class roll_functions:
                 roll_string = roll_string + additional_roll_2_string
             
             if modifier is not None:
+                print(modifier_sign)
                 if modifier_sign == "+":
                     sum = sum + int(modifier_value)
+                    if int(modifier_value) < 0:                        
+                        roll_string = roll_string + " - " + f"**{int(modifier_value)*-1}**"
+                    else:
+                        roll_string = roll_string + f" {modifier_sign} " + f"**{int(modifier_value)}**"
                 elif modifier_sign == "-":
                     sum = sum - int(modifier_value)
+                    roll_string = roll_string + f" {modifier_sign} " + f"**{modifier_value}**"
                 elif modifier_sign == "/":
                     sum = round(sum/int(modifier_value))
+                    roll_string = roll_string  + f" {modifier_2_sign} " + f"**{modifier_2_value}**"
                 elif modifier_sign == "*":
                     sum = sum * int(modifier_value)
-                roll_string = roll_string +  " " + modifier_sign + " " + modifier_value
+                    roll_string = roll_string +  f"{modifier_sign}" + f"**{modifier_value}**"
 
             if modifier_2 is not None:
                 if modifier_2_sign == "+":
                     sum = sum + int(modifier_2_value)
-                elif modifier_2_sign == "-":
-                    sum = sum - int(modifier_2_value)
+                    if int(modifier_2_value) < 0:                         
+                        roll_string = roll_string + " - " + f"**{int(modifier_2_value)*-1}**"
+                    else:
+                        roll_string = roll_string  + f" {modifier_2_sign} " + f"**{modifier_2_value}**"
+
                 elif modifier_2_sign == "/":
                     sum = round(sum/int(modifier_2_value))
+                    roll_string = roll_string  + f" {modifier_2_sign} " + f"**{modifier_2_value}**"
                 elif modifier_2_sign == "*":
                     sum = sum * modifier_2_value
-                roll_string = roll_string +  " " + modifier_2_sign + " " + str(modifier_2_value)
+                    roll_string = roll_string  + f" {modifier_2_sign} " + f"**{modifier_2_value}**"
 
-            for chosen_roll in roll_results:
-                sum = sum + int(chosen_roll)
 
             return ["success", roll_string, sum]                        
 
